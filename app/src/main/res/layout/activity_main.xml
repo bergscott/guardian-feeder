@@ -10,8 +10,10 @@
     android:paddingTop="@dimen/activity_vertical_margin"
     tools:context="com.bergscott.android.guardianfeeder.MainActivity">
 
-    <TextView
+    <ListView
+        android:id="@+id/list"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Hello World!" />
+        android:orientation="vertical"/>
+
 </RelativeLayout>
