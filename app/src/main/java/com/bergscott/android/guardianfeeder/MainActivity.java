@@ -1,8 +1,12 @@
 package com.bergscott.android.guardianfeeder;
 
+import android.content.Intent;
+import android.net.Uri;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.View;
+import android.widget.AdapterView;
 import android.widget.ListView;
 
 import org.json.JSONArray;
@@ -36,32 +40,45 @@ public class MainActivity extends AppCompatActivity {
         try {
             // get root JSONObject
             JSONObject root = new JSONObject(SAMPLE_JSON_RESPONSE);
+
             // get response JSONObject
             JSONObject JSONResponse = root.getJSONObject("response");
+
             // get JSONArray of Articles
             JSONArray articlesArray = JSONResponse.getJSONArray("results");
+
             // for each Article in the array,
             for (int i = 0; i < articlesArray.length(); i++) {
                 // get the article JSONObject at the current index of the array
                 JSONObject currentArticle = articlesArray.getJSONObject(i);
+
                 // get the article title from the JSON object
                 String title = currentArticle.getString("webTitle");
+
                 // get the article url from the JSON object
                 String url = currentArticle.getString("webUrl");
+
                 // get the author containing tags JSONArray from the article object
                 JSONArray tagsArray = currentArticle.getJSONArray("tags");
+
                 // get the first item in the tags array
                 JSONObject authorTag = tagsArray.getJSONObject(0);
+
                 // get the author's name from the JSONObject
                 String author = authorTag.getString("webTitle");
+
                 // get the publication date from the JSON Object
                 String date = currentArticle.getString("webPublicationDate");
+
                 // replace the Z signifying a time offset of zero with "+0000"
                 date = date.replace("Z", "+0000");
+
                 // convert date string to milliseconds
                 long dateInMilliseconds = DATE_FORMAT.parse(date, new ParsePosition(0)).getTime();
+
                 // get the section from the JSON Object
                 String section = currentArticle.getString("sectionName");
+
                 // create a new Article object from the extracted properties and add it to the list
                 // of Articles
                 articles.add(new Article(title, url, author, dateInMilliseconds, section));
@@ -77,5 +94,17 @@ public class MainActivity extends AppCompatActivity {
         // create a new ArticleAdapter and set it to the list view
         mArticleAdapter = new ArticleAdapter(this, articles);
         articleListView.setAdapter(mArticleAdapter);
+
+        // create an onItemClickListener to open the article's url in a browser when clicked
+        articleListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> adapterView, View view, int position, long id) {
+                Uri webpage = Uri.parse(mArticleAdapter.getItem(position).getUrl());
+                Intent intent = new Intent(Intent.ACTION_VIEW, webpage);
+                if (intent.resolveActivity(getPackageManager()) != null) {
+                    startActivity(intent);
+                }
+            }
+        });
     }
 }
