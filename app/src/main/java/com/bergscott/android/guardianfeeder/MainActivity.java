@@ -60,11 +60,18 @@ public class MainActivity extends AppCompatActivity {
     private class ArticleAsyncTask extends AsyncTask<String, Void, ArrayList<Article>> {
         @Override
         protected ArrayList<Article> doInBackground(String... urlStrings) {
+            // return null if no url is passed in as a parameter
+            if (urlStrings.length == 0 || urlStrings[0] == null) {
+                return null;
+            }
             return QueryUtils.extractArticles(urlStrings[0]);
         }
 
         @Override
         protected void onPostExecute(ArrayList<Article> articles) {
+            if (articles == null) {
+                return;
+            }
             mArticleAdapter.clear();
             mArticleAdapter.addAll(articles);
         }
