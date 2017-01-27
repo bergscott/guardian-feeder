@@ -6,6 +6,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.net.URL;
 import java.text.DateFormat;
 import java.text.ParsePosition;
 import java.text.SimpleDateFormat;
@@ -30,15 +31,15 @@ public final class QueryUtils {
 
     /**
      * Return a list of {@link Article} objects that has been built up from parsing a JSON response.
-     * @param jsonResponse JSON response from Guardian API
+     * @param urlString url to query Guardian API
      * @return list of Articles
      */
-    public static ArrayList<Article> extractArticles(String jsonResponse) {
+    public static ArrayList<Article> extractArticles(String urlString) {
         ArrayList<Article> articles = new ArrayList<Article>();
 
         try {
             // get root JSONObject
-            JSONObject root = new JSONObject(jsonResponse);
+            JSONObject root = new JSONObject(SAMPLE_JSON_RESPONSE);
 
             // get response JSONObject
             JSONObject JSONResponse = root.getJSONObject("response");
@@ -69,18 +70,12 @@ public final class QueryUtils {
                 // get the publication date from the JSON Object
                 String date = currentArticle.getString("webPublicationDate");
 
-                // replace the Z signifying a time offset of zero with "+0000"
-                date = date.replace("Z", "+0000");
-
-                // convert date string to milliseconds
-                long dateInMilliseconds = DATE_FORMAT.parse(date, new ParsePosition(0)).getTime();
-
                 // get the section from the JSON Object
                 String section = currentArticle.getString("sectionName");
 
                 // create a new Article object from the extracted properties and add it to the list
                 // of Articles
-                articles.add(new Article(title, url, author, dateInMilliseconds, section));
+                articles.add(new Article(title, url, author, convertDateTime(date), section));
             }
 
         } catch (JSONException e) {
@@ -91,6 +86,14 @@ public final class QueryUtils {
         }
 
         return articles;
+    }
+
+    private static long convertDateTime(String dateTime) {
+        // replace the Z signifying a time offset of zero with "+0000"
+        dateTime = dateTime.replace("Z", "+0000");
+
+        // convert date string to milliseconds and return it
+        return DATE_FORMAT.parse(dateTime, new ParsePosition(0)).getTime();
     }
 
 }
