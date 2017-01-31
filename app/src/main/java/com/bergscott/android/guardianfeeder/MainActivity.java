@@ -26,6 +26,8 @@ public class MainActivity extends AppCompatActivity {
 
     private ArticleAdapter mArticleAdapter;
 
+    private final String GUARDIAN_REQUEST_URL = "http://content.guardianapis.com/search";
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -50,8 +52,21 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
+        String guardianQueryString = makeQueryString("board game");
+
         // fetch Article list from guardian API and update list adapter in background thread
-        new ArticleAsyncTask().execute(QueryUtils.SAMPLE_QUERY_URL);
+        new ArticleAsyncTask().execute(guardianQueryString);
+    }
+
+    private String makeQueryString(String query) {
+        Uri baseUri = Uri.parse(GUARDIAN_REQUEST_URL);
+        Uri.Builder uriBuilder = baseUri.buildUpon();
+        uriBuilder.appendQueryParameter("q", query);
+        uriBuilder.appendQueryParameter("show-fields", "byline");
+        uriBuilder.appendQueryParameter("show-tags", "contributor");
+        uriBuilder.appendQueryParameter("api-key", "test");
+
+        return uriBuilder.toString();
     }
 
     private class ArticleAsyncTask extends AsyncTask<String, Void, ArrayList<Article>> {
