@@ -1,3 +1,4 @@
 <resources>
     <string name="app_name">Guardian Feeder</string>
+    <string name="empty_articles_list">No articles were found.</string>
 </resources>

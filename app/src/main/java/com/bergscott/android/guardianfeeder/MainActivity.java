@@ -11,6 +11,8 @@ import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ListView;
+import android.widget.ProgressBar;
+import android.widget.TextView;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -29,6 +31,8 @@ import static android.icu.lang.UCharacter.GraphemeClusterBreak.L;
 public class MainActivity extends AppCompatActivity implements LoaderManager.LoaderCallbacks<List<Article>> {
 
     private ArticleAdapter mArticleAdapter;
+    private TextView mEmptyStateTextView;
+    private ProgressBar mProgressBar;
 
     private final String GUARDIAN_REQUEST_URL = "http://content.guardianapis.com/search";
 
@@ -44,6 +48,10 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
         mArticleAdapter = new ArticleAdapter(this, new ArrayList<Article>());
         articleListView.setAdapter(mArticleAdapter);
 
+        // find the empty state TextView and set it to the article list view
+        mEmptyStateTextView = (TextView) findViewById(R.id.empty_state_text_view);
+        articleListView.setEmptyView(mEmptyStateTextView);
+
         // create an onItemClickListener to open the article's url in a browser when clicked
         articleListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
@@ -56,6 +64,11 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
             }
         });
 
+        // find the progress bar view for use in onLoadFinished
+        mProgressBar = (ProgressBar) findViewById(R.id.progress_spinner);
+
+        // start the loader that will handle updating the article information through a http request
+        // on a background thread
         getLoaderManager().initLoader(0, null, this);
     }
 
@@ -66,11 +79,16 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
 
     @Override
     public void onLoadFinished(Loader<List<Article>> loader, List<Article> articles) {
+        // hide the progress spinner
+        mProgressBar.setVisibility(View.GONE);
+
         if (articles != null && !articles.isEmpty()) {
             // clear the article adapter and update it with the found articles
             mArticleAdapter.clear();
             mArticleAdapter.addAll(articles);
         }
+
+        mEmptyStateTextView.setText(R.string.empty_articles_list);
     }
 
     @Override
@@ -79,12 +97,21 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
         mArticleAdapter.clear();
     }
 
+    /**
+     * Make a String url query for the Guardian api
+     * @param query user's search terms for query
+     * @return string url query
+     */
     private String makeQueryString(String query) {
         Uri baseUri = Uri.parse(GUARDIAN_REQUEST_URL);
         Uri.Builder uriBuilder = baseUri.buildUpon();
+        // add the user's search terms to the response
         uriBuilder.appendQueryParameter("q", query);
+        // include the byline in the response
         uriBuilder.appendQueryParameter("show-fields", "byline");
+        // include contributor information in the response
         uriBuilder.appendQueryParameter("show-tags", "contributor");
+        // use the test api key
         uriBuilder.appendQueryParameter("api-key", "test");
 
         return uriBuilder.toString();
