@@ -1,8 +1,11 @@
 package com.bergscott.android.guardianfeeder;
 
 import android.app.LoaderManager;
+import android.content.Context;
 import android.content.Intent;
 import android.content.Loader;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.support.v7.app.AppCompatActivity;
@@ -67,9 +70,20 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
         // find the progress bar view for use in onLoadFinished
         mProgressBar = (ProgressBar) findViewById(R.id.progress_spinner);
 
-        // start the loader that will handle updating the article information through a http request
-        // on a background thread
-        getLoaderManager().initLoader(0, null, this);
+        // get the current network status
+        ConnectivityManager connectivityManager = (ConnectivityManager) getSystemService(
+                Context.CONNECTIVITY_SERVICE);
+        NetworkInfo networkInfo = connectivityManager.getActiveNetworkInfo();
+
+        // if connected to network, start the loader that will handle updating the article
+        // information through a http request on a background thread
+        if (networkInfo != null && networkInfo.isConnected()) {
+            getLoaderManager().initLoader(0, null, this);
+        } else {
+            // no network connection, hide progress spinner and set text of empty state view
+            mProgressBar.setVisibility(View.GONE);
+            mEmptyStateTextView.setText(R.string.no_network);
+        }
     }
 
     @Override
