@@ -34,9 +34,6 @@ public class MainActivity extends AppCompatActivity {
         // retrieve the list view from the xml layout
         ListView articleListView = (ListView) findViewById(R.id.list);
 
-        // get the list of articles from the sample json response
-        ArrayList<Article> articles = QueryUtils.extractArticles(QueryUtils.SAMPLE_JSON_RESPONSE);
-
         // create a new ArticleAdapter and set it to the list view
         mArticleAdapter = new ArticleAdapter(this, new ArrayList<Article>());
         articleListView.setAdapter(mArticleAdapter);
@@ -54,7 +51,7 @@ public class MainActivity extends AppCompatActivity {
         });
 
         // fetch Article list from guardian API and update list adapter in background thread
-        new ArticleAsyncTask().execute(QueryUtils.SAMPLE_JSON_RESPONSE);
+        new ArticleAsyncTask().execute(QueryUtils.SAMPLE_QUERY_URL);
     }
 
     private class ArticleAsyncTask extends AsyncTask<String, Void, ArrayList<Article>> {

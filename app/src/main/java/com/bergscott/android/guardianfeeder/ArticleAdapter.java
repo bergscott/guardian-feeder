@@ -51,7 +51,12 @@ class ArticleAdapter extends ArrayAdapter<Article> {
 
         // get the author of the article and update its text view
         TextView authorTextView = (TextView) listItemView.findViewById(R.id.article_author);
-        authorTextView.setText(currentArticle.getAuthor());
+        if (currentArticle.getAuthor() == null) {
+            authorTextView.setVisibility(View.GONE);
+        } else {
+            authorTextView.setVisibility(View.VISIBLE);
+            authorTextView.setText(currentArticle.getAuthor());
+        }
 
         // get the article's date and convert it to a new Date object
         Date articleDate = new Date(currentArticle.getDateInMilliseconds());
