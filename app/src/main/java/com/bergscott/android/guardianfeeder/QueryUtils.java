@@ -20,9 +20,6 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Locale;
 
-import static android.R.attr.author;
-import static android.R.attr.key;
-
 /**
  * helper functions for querying The Guardian API and parsing response
  */
@@ -47,7 +44,7 @@ public final class QueryUtils {
         // Create an empty ArrayList to add Articles to
         ArrayList<Article> articles = new ArrayList<Article>();
 
-        Log.v(LOG_TAG, urlString);
+        Log.v(LOG_TAG, "Query url: " + urlString);
         // Retrieve a jsonResponse from the Guardian API
         String jsonResponse = getArticleJson(urlString);
 

@@ -1,6 +1,8 @@
 package com.bergscott.android.guardianfeeder;
 
+import android.app.LoaderManager;
 import android.content.Intent;
+import android.content.Loader;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.support.v7.app.AppCompatActivity;
@@ -22,7 +24,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 
-public class MainActivity extends AppCompatActivity {
+import static android.icu.lang.UCharacter.GraphemeClusterBreak.L;
+
+public class MainActivity extends AppCompatActivity implements LoaderManager.LoaderCallbacks<List<Article>> {
 
     private ArticleAdapter mArticleAdapter;
 
@@ -52,10 +56,27 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-        String guardianQueryString = makeQueryString("board game");
+        getLoaderManager().initLoader(0, null, this);
+    }
 
-        // fetch Article list from guardian API and update list adapter in background thread
-        new ArticleAsyncTask().execute(guardianQueryString);
+    @Override
+    public Loader<List<Article>> onCreateLoader(int i, Bundle bundle) {
+        return new ArticleLoader(this, makeQueryString("board game"));
+    }
+
+    @Override
+    public void onLoadFinished(Loader<List<Article>> loader, List<Article> articles) {
+        if (articles != null && !articles.isEmpty()) {
+            // clear the article adapter and update it with the found articles
+            mArticleAdapter.clear();
+            mArticleAdapter.addAll(articles);
+        }
+    }
+
+    @Override
+    public void onLoaderReset(Loader<List<Article>> loader) {
+        // loader reset, so clear existing data
+        mArticleAdapter.clear();
     }
 
     private String makeQueryString(String query) {
@@ -67,25 +88,5 @@ public class MainActivity extends AppCompatActivity {
         uriBuilder.appendQueryParameter("api-key", "test");
 
         return uriBuilder.toString();
-    }
-
-    private class ArticleAsyncTask extends AsyncTask<String, Void, ArrayList<Article>> {
-        @Override
-        protected ArrayList<Article> doInBackground(String... urlStrings) {
-            // return null if no url is passed in as a parameter
-            if (urlStrings.length == 0 || urlStrings[0] == null) {
-                return null;
-            }
-            return QueryUtils.extractArticles(urlStrings[0]);
-        }
-
-        @Override
-        protected void onPostExecute(ArrayList<Article> articles) {
-            if (articles == null) {
-                return;
-            }
-            mArticleAdapter.clear();
-            mArticleAdapter.addAll(articles);
-        }
     }
 }
