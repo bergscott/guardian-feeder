@@ -2,4 +2,33 @@
     <string name="app_name">Guardian Feeder</string>
     <string name="empty_articles_list">No articles were found.</string>
     <string name="no_network">No network connection</string>
+
+    <!-- Settings Menu Item [CHAR LIMIT=NONE] -->
+    <string name="settings_menu_item">Settings</string>
+
+    <!-- Settings Activity Title [CHAR LIMIT=NONE] -->
+    <string name="settings_title">Article Settings</string>
+
+    <!-- Strings For Default Search Keywords [CHAR LIMIT=30] -->
+    <string name="settings_first_sarch_label">Default Search Keywords</string>
+    <string name="settings_first_search_key" translatable="false">first_search</string>
+    <string name="settings_first_search_default" translatable="false">board game</string>
+
+    <!-- Strings For Order-By Preference [CHAR LIMIT=30] -->
+    <string name="settings_order_by_label">Order By</string>
+    <string name="settings_order_by_key" translatable="false">order_by</string>
+    <string name="settings_order_by_default" translatable="false">@string/settings_order_by_relevance_value</string>
+
+    <!-- Label for order-by relevance option [CHAR LIMIT=20] -->
+    <string name="settings_order_by_relevance_label">Relevance</string>
+    <string name="settings_order_by_relevance_value" translatable="false">relevance</string>
+
+    <!-- Label for order-by most recent option [CHAR LIMIT=20] -->
+    <string name="settings_order_by_most_recent_label">Most Recent</string>
+    <string name="settings_order_by_most_recent_value" translatable="false">newest</string>
+
+    <!-- Strings For Default Number of Results to Show [CHAR LIMIT=30] -->
+    <string name="settings_max_articles_label">Max Articles Retrieved (1 to 50)</string>
+    <string name="settings_max_articles_key" translatable="false">max_articles</string>
+    <string name="settings_max_articles_default" translatable="false">10</string>
 </resources>

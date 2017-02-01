@@ -23,6 +23,7 @@
             android:layout_weight="1"
             android:maxLines="1"
             android:inputType="text"
+            android:selectAllOnFocus="true"
             android:imeOptions="actionSearch"
             android:hint="find articles" />
 

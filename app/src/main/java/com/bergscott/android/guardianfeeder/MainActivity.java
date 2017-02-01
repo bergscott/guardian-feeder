@@ -4,15 +4,19 @@ import android.app.LoaderManager;
 import android.content.Context;
 import android.content.Intent;
 import android.content.Loader;
+import android.content.SharedPreferences;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.net.Uri;
 import android.os.AsyncTask;
+import android.preference.PreferenceManager;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.KeyEvent;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputMethodManager;
@@ -44,7 +48,8 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
     private TextView mEmptyStateTextView;
     private ProgressBar mProgressBar;
     private EditText mSearchBar;
-    private String mPreviousSearch = "board game";
+    private String mPreviousSearch;
+    private SharedPreferences mSharedPrefs;
 
     private final String GUARDIAN_REQUEST_URL = "http://content.guardianapis.com/search";
 
@@ -100,6 +105,11 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
         // find the progress bar view for use in onLoadFinished
         mProgressBar = (ProgressBar) findViewById(R.id.progress_spinner);
 
+        // retrieve the last used search keywords from the shared preferences and populate the
+        // articles list by searching those keywords in background thread
+        mSharedPrefs = PreferenceManager.getDefaultSharedPreferences(this);
+        mPreviousSearch = mSharedPrefs.getString(getString(R.string.settings_first_search_key),
+                getString(R.string.settings_first_search_default));
         Bundle bundle = new Bundle();
         bundle.putString("queryString", mPreviousSearch);
         getLoaderManager().initLoader(0, bundle, this);
@@ -132,12 +142,17 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
         // if connected to network, start the loader that will handle updating the article
         // information through a http request on a background thread
         if (networkInfo != null && networkInfo.isConnected()) {
+            // only update if the search keywords are different from the previous search
             if (!TextUtils.equals(keywords, mPreviousSearch)) {
+                // put the search keywords in a Bundle to pass to the loader
                 Bundle bundle = new Bundle();
                 bundle.putString("queryString", keywords);
+                // clear the article adapter and show the spinning progress wheel
                 mArticleAdapter.clear();
                 mProgressBar.setVisibility(View.VISIBLE);
+                // start a new request to the api on a background thread
                 getLoaderManager().restartLoader(0, bundle, this);
+                // update the previous search variable
                 mPreviousSearch = keywords;
             }
         } else {
@@ -172,6 +187,23 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
         mArticleAdapter.clear();
     }
 
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.main, menu);
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        int id = item.getItemId();
+        if (id == R.id.action_settings) {
+            Intent settingsIntent = new Intent(this, SettingsActivity.class);
+            startActivity(settingsIntent);
+            return true;
+        }
+        return super.onOptionsItemSelected(item);
+    }
+
     /**
      * Make a String url query for the Guardian api
      * @param query user's search terms for query
@@ -186,9 +218,26 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
         uriBuilder.appendQueryParameter("show-fields", "byline");
         // include contributor information in the response
         uriBuilder.appendQueryParameter("show-tags", "contributor");
+        // include user's order-by preference
+        uriBuilder.appendQueryParameter("order-by", mSharedPrefs.getString(
+                getString(R.string.settings_order_by_key),
+                getString(R.string.settings_order_by_default)));
+        // include user's max articles preference
+        uriBuilder.appendQueryParameter("page-size", mSharedPrefs.getString(
+                getString(R.string.settings_max_articles_key),
+                getString(R.string.settings_max_articles_default)));
         // use the test api key
         uriBuilder.appendQueryParameter("api-key", "test");
 
         return uriBuilder.toString();
+    }
+
+    @Override
+    // save the most recent search to shared preferences on pause for use on next onCreate
+    protected void onPause() {
+        SharedPreferences.Editor editor = mSharedPrefs.edit();
+        editor.putString(getString(R.string.settings_first_search_key), mPreviousSearch);
+        editor.commit();
+        super.onPause();
     }
 }
