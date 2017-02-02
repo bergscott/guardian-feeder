@@ -3,6 +3,9 @@
     <string name="empty_articles_list">No articles were found.</string>
     <string name="no_network">No network connection</string>
 
+    <string name="search_button">Search</string>
+    <string name="search_hint">find articles</string>
+
     <!-- Settings Menu Item [CHAR LIMIT=NONE] -->
     <string name="settings_menu_item">Settings</string>
 
